@@ -1,0 +1,169 @@
+Port /dev/serial0 @ 115200. BOOT tuşuna bas: kayıt başlar / durur.
+Klavye: led 0|1, hiz 1..100, k (kayıt), q (çık)
+[    5 s]  50.2 Hz | geçerli 252 | hatalı 0 | kayıt kapalı
+<- BTN 2
+
+>>> KAYIT BAŞLADI (BTN 2) -> kayit_20261104_003808.csv
+<- ACK LED 1  (5.7 ms)
+<- BTN 3
+
+=== Kayıt bitti ===
+Dosya          : kayit_20261104_003808.csv
+Örnek sayısı   : 40
+Süre           : 0.78 s (ESP32 saatine göre)
+Ortalama ivme  : 1.035 g  (|a|, düz dururken ~1 g)
+En büyük dönü  : 3.7 °/s  (|ω|)
+===================
+
+<- ACK LED 0  (4.4 ms)
+<- BTN 4
+
+>>> KAYIT BAŞLADI (BTN 4) -> kayit_20261104_003809.csv
+<- ACK LED 1  (4.7 ms)
+<- BTN 5
+
+=== Kayıt bitti ===
+Dosya          : kayit_20261104_003809.csv
+Örnek sayısı   : 31
+Süre           : 0.60 s (ESP32 saatine göre)
+Ortalama ivme  : 1.034 g  (|a|, düz dururken ~1 g)
+En büyük dönü  : 4.1 °/s  (|ω|)
+===================
+
+<- ACK LED 0  (4.4 ms)
+<- BTN 6
+
+>>> KAYIT BAŞLADI (BTN 6) -> kayit_20261104_003811.csv
+<- ACK LED 1  (4.7 ms)
+<- BTN 7
+
+=== Kayıt bitti ===
+Dosya          : kayit_20261104_003811.csv
+Örnek sayısı   : 43
+Süre           : 0.84 s (ESP32 saatine göre)
+Ortalama ivme  : 1.034 g  (|a|, düz dururken ~1 g)
+En büyük dönü  : 2.1 °/s  (|ω|)
+===================
+
+<- ACK LED 0  (5.0 ms)
+<- BTN 8
+
+>>> KAYIT BAŞLADI (BTN 8) -> kayit_20261104_003812.csv
+<- ACK LED 1  (4.8 ms)
+[   10 s]  50.0 Hz | geçerli 503 | hatalı 0 | kayıt AÇIK
+<- BTN 9
+
+=== Kayıt bitti ===
+Dosya          : kayit_20261104_003812.csv
+Örnek sayısı   : 35
+Süre           : 0.68 s (ESP32 saatine göre)
+Ortalama ivme  : 1.033 g  (|a|, düz dururken ~1 g)
+En büyük dönü  : 2.2 °/s  (|ω|)
+===================
+
+<- ACK LED 0  (4.4 ms)
+<- BTN 10
+
+>>> KAYIT BAŞLADI (BTN 10) -> kayit_20261104_003814.csv
+<- ACK LED 1  (4.4 ms)
+<- BTN 11
+
+=== Kayıt bitti ===
+Dosya          : kayit_20261104_003814.csv
+Örnek sayısı   : 39
+Süre           : 0.76 s (ESP32 saatine göre)
+Ortalama ivme  : 1.036 g  (|a|, düz dururken ~1 g)
+En büyük dönü  : 2.0 °/s  (|ω|)
+===================
+
+<- ACK LED 0  (5.1 ms)
+<- BTN 12
+
+>>> KAYIT BAŞLADI (BTN 12) -> kayit_20261104_003815.csv
+<- ACK LED 1  (5.5 ms)
+<- BTN 13
+
+=== Kayıt bitti ===
+Dosya          : kayit_20261104_003815.csv
+Örnek sayısı   : 46
+Süre           : 0.90 s (ESP32 saatine göre)
+Ortalama ivme  : 1.035 g  (|a|, düz dururken ~1 g)
+En büyük dönü  : 2.1 °/s  (|ω|)
+===================
+
+<- ACK LED 0  (5.0 ms)
+<- BTN 14
+
+>>> KAYIT BAŞLADI (BTN 14) -> kayit_20261104_003817.csv
+<- ACK LED 1  (5.5 ms)
+[   15 s]  50.0 Hz | geçerli 754 | hatalı 0 | kayıt AÇIK
+<- BTN 15
+
+=== Kayıt bitti ===
+Dosya          : kayit_20261104_003817.csv
+Örnek sayısı   : 35
+Süre           : 0.68 s (ESP32 saatine göre)
+Ortalama ivme  : 1.034 g  (|a|, düz dururken ~1 g)
+En büyük dönü  : 2.2 °/s  (|ω|)
+===================
+
+<- ACK LED 0  (4.9 ms)
+<- BTN 16
+
+>>> KAYIT BAŞLADI (BTN 16) -> kayit_20261104_003818.csv
+<- ACK LED 1  (5.8 ms)
+<- BTN 17
+
+=== Kayıt bitti ===
+Dosya          : kayit_20261104_003818.csv
+Örnek sayısı   : 40
+Süre           : 0.78 s (ESP32 saatine göre)
+Ortalama ivme  : 1.034 g  (|a|, düz dururken ~1 g)
+En büyük dönü  : 2.3 °/s  (|ω|)
+===================
+
+<- ACK LED 0  (5.0 ms)
+<- BTN 18
+
+>>> KAYIT BAŞLADI (BTN 18) -> kayit_20261104_003820.csv
+<- ACK LED 1  (4.7 ms)
+<- BTN 19
+
+=== Kayıt bitti ===
+Dosya          : kayit_20261104_003820.csv
+Örnek sayısı   : 37
+Süre           : 0.72 s (ESP32 saatine göre)
+Ortalama ivme  : 1.035 g  (|a|, düz dururken ~1 g)
+En büyük dönü  : 2.0 °/s  (|ω|)
+===================
+
+<- ACK LED 0  (5.2 ms)
+<- BTN 20
+
+>>> KAYIT BAŞLADI (BTN 20) -> kayit_20261104_003822.csv
+<- ACK LED 1  (4.7 ms)
+<- BTN 21
+
+=== Kayıt bitti ===
+Dosya          : kayit_20261104_003822.csv
+Örnek sayısı   : 33
+Süre           : 0.64 s (ESP32 saatine göre)
+Ortalama ivme  : 1.034 g  (|a|, düz dururken ~1 g)
+En büyük dönü  : 2.3 °/s  (|ω|)
+===================
+
+<- ACK LED 0  (5.0 ms)
+[   20 s]  50.0 Hz | geçerli 1005 | hatalı 0 | kayıt kapalı
+[   25 s]  50.0 Hz | geçerli 1256 | hatalı 0 | kayıt kapalı
+[   30 s]  50.0 Hz | geçerli 1507 | hatalı 0 | kayıt kapalı
+[   35 s]  50.0 Hz | geçerli 1758 | hatalı 0 | kayıt kapalı
+[   40 s]  50.0 Hz | geçerli 2009 | hatalı 0 | kayıt kapalı
+[   45 s]  50.0 Hz | geçerli 2260 | hatalı 0 | kayıt kapalı
+[   50 s]  50.0 Hz | geçerli 2511 | hatalı 0 | kayıt kapalı
+[   55 s]  50.0 Hz | geçerli 2762 | hatalı 0 | kayıt kapalı
+
+--- Genel özet ---
+Süre: 60.0 s | geçerli IMU satırı: 3001 | ortalama hız: 50.00 Hz
+Hatalı satır: 0 
+BTN mesajı: 20 | sırada atlanan: 0
+Komut-ACK süresi (20 komut): en kısa 4.4 ms, ortalama 4.9 ms, en uzun 5.8 ms

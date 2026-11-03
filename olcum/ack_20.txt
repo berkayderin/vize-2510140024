@@ -1,0 +1,30 @@
+Port /dev/serial0 @ 115200. BOOT tuşuna bas: kayıt başlar / durur.
+Klavye: led 0|1, hiz 1..100, k (kayıt), q (çık)
+<- ACK LED 1  (4.1 ms)
+<- ACK LED 0  (4.0 ms)
+<- ACK LED 1  (4.0 ms)
+<- ACK LED 0  (4.0 ms)
+<- ACK LED 1  (4.0 ms)
+<- ACK LED 0  (4.0 ms)
+<- ACK LED 1  (4.0 ms)
+<- ACK LED 0  (4.0 ms)
+<- ACK LED 1  (4.0 ms)
+<- ACK LED 0  (4.0 ms)
+[    5 s]  50.0 Hz | geçerli 250 | hatalı 1 | kayıt kapalı
+<- ACK LED 1  (4.3 ms)
+<- ACK LED 0  (4.3 ms)
+<- ACK LED 1  (4.3 ms)
+<- ACK LED 0  (4.3 ms)
+<- ACK LED 1  (4.3 ms)
+<- ACK LED 0  (4.3 ms)
+<- ACK LED 1  (4.3 ms)
+<- ACK LED 0  (4.3 ms)
+<- ACK LED 1  (4.3 ms)
+<- ACK LED 0  (4.3 ms)
+[   10 s]  50.0 Hz | geçerli 501 | hatalı 1 | kayıt kapalı
+
+--- Genel özet ---
+Süre: 15.0 s | geçerli IMU satırı: 749 | ortalama hız: 49.93 Hz
+Hatalı satır: 1 {'BICIM': 1}
+BTN mesajı: 0 | sırada atlanan: 0
+Komut-ACK süresi (20 komut): en kısa 4.0 ms, ortalama 4.2 ms, en uzun 4.3 ms

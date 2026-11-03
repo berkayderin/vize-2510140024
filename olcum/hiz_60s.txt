@@ -1,0 +1,33 @@
+Port /dev/serial0 @ 115200. BOOT tuşuna bas: kayıt başlar / durur.
+Klavye: led 0|1, hiz 1..100, k (kayıt), q (çık)
+[    5 s]  50.2 Hz | geçerli 252 | hatalı 1 | kayıt kapalı
+[   10 s]  50.0 Hz | geçerli 503 | hatalı 1 | kayıt kapalı
+<- BTN 1
+
+>>> KAYIT BAŞLADI (BTN 1) -> kayit_20261104_003640.csv
+<- ACK LED 1  (4.8 ms)
+[   15 s]  50.0 Hz | geçerli 754 | hatalı 1 | kayıt AÇIK
+[   20 s]  50.0 Hz | geçerli 1005 | hatalı 1 | kayıt AÇIK
+[   25 s]  50.0 Hz | geçerli 1256 | hatalı 1 | kayıt AÇIK
+[   30 s]  50.0 Hz | geçerli 1507 | hatalı 1 | kayıt AÇIK
+[   35 s]  50.0 Hz | geçerli 1758 | hatalı 1 | kayıt AÇIK
+[   40 s]  50.0 Hz | geçerli 2009 | hatalı 1 | kayıt AÇIK
+[   45 s]  50.0 Hz | geçerli 2260 | hatalı 1 | kayıt AÇIK
+[   50 s]  50.0 Hz | geçerli 2511 | hatalı 1 | kayıt AÇIK
+[   55 s]  50.0 Hz | geçerli 2762 | hatalı 1 | kayıt AÇIK
+[   60 s]  50.0 Hz | geçerli 3013 | hatalı 1 | kayıt AÇIK
+
+=== Kayıt bitti ===
+Dosya          : kayit_20261104_003640.csv
+Örnek sayısı   : 2624
+Süre           : 52.46 s (ESP32 saatine göre)
+Ortalama ivme  : 1.035 g  (|a|, düz dururken ~1 g)
+En büyük dönü  : 24.3 °/s  (|ω|)
+===================
+
+
+--- Genel özet ---
+Süre: 65.1 s | geçerli IMU satırı: 3251 | ortalama hız: 49.92 Hz
+Hatalı satır: 1 {'BICIM': 1}
+BTN mesajı: 1 | sırada atlanan: 0
+Komut-ACK süresi (1 komut): en kısa 4.8 ms, ortalama 4.8 ms, en uzun 4.8 ms
