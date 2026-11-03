@@ -66,6 +66,8 @@ static SemaphoreHandle_t dugme_isareti;
 static volatile uint32_t ham_kenar_sayisi;   /* kesmede sayılır: sıçramayı görmek için */
 static int olcum_hizi_hz = 50;
 static uint32_t kayip_satir;                 /* kuyruk dolu olduğu için atılan satır */
+static uint32_t gonderilen_satir, alinan_bayt; /* teşhis sayaçları */
+static int64_t en_uzun_yazma_us;
 
 /* ================================================================ protokol */
 static uint8_t xor_toplami(const char *s, size_t n)
@@ -89,8 +91,13 @@ static void gonderici_gorevi(void *arg)
 {
     satir_t s;
     for (;;) {
-        if (xQueueReceive(gonderim_kuyrugu, &s, portMAX_DELAY) == pdTRUE)
+        if (xQueueReceive(gonderim_kuyrugu, &s, portMAX_DELAY) == pdTRUE) {
+            int64_t t0 = esp_timer_get_time();
             uart_write_bytes(PI_UART, s.metin, strlen(s.metin));
+            int64_t sure = esp_timer_get_time() - t0;
+            if (sure > en_uzun_yazma_us) en_uzun_yazma_us = sure;
+            gonderilen_satir++;
+        }
     }
 }
 
@@ -293,6 +300,7 @@ static void komut_gorevi(void *arg)
 
     for (;;) {
         int okunan = uart_read_bytes(PI_UART, parca, sizeof parca, pdMS_TO_TICKS(20));
+        if (okunan > 0) alinan_bayt += okunan;
         for (int i = 0; i < okunan; i++) {
             char c = (char)parca[i];
             if (c == '$') {          /* her '$' yeni satır: yarım kalan önceki veri atılır */
@@ -358,8 +366,14 @@ void app_main(void)
              olcum_hizi_hz, PI_TX_PIN, PI_RX_PIN, LED_PIN, DUGME_PIN);
 
     /* her 10 saniyede bir durum yazdır (USB konsoluna, Pi'ye değil) */
+    uint32_t onceki_gonderilen = 0, onceki_kayip = 0, onceki_kenar = 0, onceki_bayt = 0;
     for (;;) {
         vTaskDelay(pdMS_TO_TICKS(10000));
-        if (kayip_satir) ESP_LOGW(TAG, "Kuyruk dolu oldugu icin atilan satir: %lu", (unsigned long)kayip_satir);
+        ESP_LOGI(TAG, "10 s: gonderilen %lu satir, atilan %lu, Pi'den gelen %lu bayt, tus kenari %lu, en uzun yazma %lld us",
+                 (unsigned long)(gonderilen_satir - onceki_gonderilen), (unsigned long)(kayip_satir - onceki_kayip),
+                 (unsigned long)(alinan_bayt - onceki_bayt), (unsigned long)(ham_kenar_sayisi - onceki_kenar),
+                 (long long)en_uzun_yazma_us);
+        onceki_gonderilen = gonderilen_satir; onceki_kayip = kayip_satir;
+        onceki_bayt = alinan_bayt; onceki_kenar = ham_kenar_sayisi; en_uzun_yazma_us = 0;
     }
 }
