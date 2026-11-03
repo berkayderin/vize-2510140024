@@ -68,6 +68,7 @@ static int olcum_hizi_hz = 50;
 static uint32_t kayip_satir;                 /* kuyruk dolu olduğu için atılan satır */
 static uint32_t gonderilen_satir, alinan_bayt; /* teşhis sayaçları */
 static int64_t en_uzun_yazma_us;
+static uint32_t yanki_satir;                 /* geri gelen kendi satırlarımız */
 
 /* ================================================================ protokol */
 static uint8_t xor_toplami(const char *s, size_t n)
@@ -286,6 +287,12 @@ static void satir_isle(char *satir)
         olcum_hizini_kur(d);
         snprintf(yanit, sizeof yanit, "ACK,HIZ,%d", d);
         gonder(yanit);
+    } else if (strcmp(komut, "IMU") == 0 || strcmp(komut, "ACK") == 0 ||
+               strcmp(komut, "ERR") == 0 || strcmp(komut, "BTN") == 0) {
+        /* ESP32'nin kendi gönderdiği satır geri gelmiş (yankı: hat birbirine
+         * değiyor ya da Pi'de seri konsol açık). Yanıt verilmez; verilirse
+         * yanıt da geri gelir ve hat dolana kadar büyüyen bir döngü oluşur. */
+        yanki_satir++;
     } else {
         gonder("ERR,KOMUT");
     }
@@ -299,7 +306,18 @@ static void komut_gorevi(void *arg)
     bool satirda = false;            /* bir '$' görüldü, satır toplanıyor */
 
     for (;;) {
-        int okunan = uart_read_bytes(PI_UART, parca, sizeof parca, pdMS_TO_TICKS(20));
+        /* ilk baytı bekle, sonra tamponda ne varsa beklemeden al:
+         * böylece komut gelir gelmez işlenir (ACK gecikmesi kısa kalır) */
+        int okunan = uart_read_bytes(PI_UART, parca, 1, portMAX_DELAY);
+        if (okunan == 1) {
+            size_t bekleyen = 0;
+            uart_get_buffered_data_len(PI_UART, &bekleyen);
+            if (bekleyen > sizeof parca - 1) bekleyen = sizeof parca - 1;
+            if (bekleyen > 0) {
+                int ek = uart_read_bytes(PI_UART, parca + 1, bekleyen, 0);
+                if (ek > 0) okunan += ek;
+            }
+        }
         if (okunan > 0) alinan_bayt += okunan;
         for (int i = 0; i < okunan; i++) {
             char c = (char)parca[i];
@@ -362,7 +380,7 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_timer_create(&z, &olcum_zamanlayici));
     olcum_hizini_kur(olcum_hizi_hz);
 
-    ESP_LOGI(TAG, "Hazir: %d Hz olcum, UART1 TX=%d RX=%d, LED=GPIO%d, dugme=BOOT(GPIO0)",
+    ESP_LOGI(TAG, "Hazir: %d Hz olcum, UART1 TX=%d RX=%d, LED=GPIO%d, dugme=BOOT(GPIO%d)",
              olcum_hizi_hz, PI_TX_PIN, PI_RX_PIN, LED_PIN, DUGME_PIN);
 
     /* her 10 saniyede bir durum yazdır (USB konsoluna, Pi'ye değil) */
@@ -373,6 +391,8 @@ void app_main(void)
                  (unsigned long)(gonderilen_satir - onceki_gonderilen), (unsigned long)(kayip_satir - onceki_kayip),
                  (unsigned long)(alinan_bayt - onceki_bayt), (unsigned long)(ham_kenar_sayisi - onceki_kenar),
                  (long long)en_uzun_yazma_us);
+        if (yanki_satir) ESP_LOGW(TAG, "Uyari: kendi satirimiz geri geldi (toplam %lu). TX/RX kablolarini kontrol et.",
+                                  (unsigned long)yanki_satir);
         onceki_gonderilen = gonderilen_satir; onceki_kayip = kayip_satir;
         onceki_bayt = alinan_bayt; onceki_kenar = ham_kenar_sayisi; en_uzun_yazma_us = 0;
     }
