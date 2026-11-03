@@ -1,0 +1,6 @@
+esp32/build/
+esp32/sdkconfig
+esp32/sdkconfig.old
+__pycache__/
+*.pyc
+.DS_Store
