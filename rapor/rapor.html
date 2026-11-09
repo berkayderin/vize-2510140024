@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Vize Projesi Raporu – Berkay Derin</title>
+<style>
+@page{size:A4;margin:12mm 15mm 11mm 15mm}
+:root{--ana:#0f6e56;--acik:#e1f5ee;--cizgi:#9fcdbd;--yazi:#1c1c1a}
+html{font-family:"Carlito","Liberation Sans",Arial,sans-serif;font-size:9.5pt;line-height:1.27;color:var(--yazi)}
+body{margin:0}
+.ust{border-top:5pt solid var(--ana);padding-top:5pt;margin-bottom:6pt;display:grid;grid-template-columns:1fr auto;gap:10pt;align-items:end}
+.ust .ders{font-size:8.6pt;color:#555;letter-spacing:.04em}
+.ust h1{font-size:15pt;margin:1pt 0 1pt;color:var(--ana);line-height:1.12}
+.ust .konu{font-size:9.6pt;color:#333}
+.ust .kim{text-align:right;font-size:9pt;line-height:1.4;border-left:1pt solid var(--cizgi);padding-left:8pt;white-space:nowrap}
+.ust .kim b{font-size:10pt}
+.ozet{border:0.8pt solid var(--cizgi);background:var(--acik);border-radius:3pt;padding:4pt 7pt;margin:0 0 5pt;text-align:justify;font-size:9.2pt}
+h2{font-size:11pt;color:var(--ana);margin:7pt 0 2.5pt;padding-bottom:1pt;border-bottom:0.8pt solid var(--cizgi);font-weight:700}
+h2 span{display:inline-block;min-width:13pt}
+h3{font-size:9.8pt;margin:4pt 0 1.5pt;font-weight:700;color:#222}
+p{margin:0 0 3pt;text-align:justify}
+code,.m{font-family:"DejaVu Sans Mono","Liberation Mono",monospace;font-size:7.9pt}
+table.t{border-collapse:collapse;margin:2pt auto 1pt;font-size:8.6pt;font-variant-numeric:tabular-nums}
+table.t th{color:var(--ana);font-weight:700;padding:1.5pt 5pt;border-bottom:1pt solid var(--ana);text-align:left}
+table.t td{padding:1.3pt 5pt;border-bottom:0.4pt solid #d6e9e2;text-align:left}
+table.t td.s{text-align:right}
+.cap{font-size:8.3pt;color:#444;text-align:center;margin:1pt 0 4pt}
+.cap b{color:var(--ana)}
+figure{margin:2pt 0 0;text-align:center}
+figure img{width:100%}
+ul{margin:0 0 3pt;padding-left:12pt}
+li{margin:0 0 2pt;text-align:justify}
+.beyan{margin-top:6pt;padding:3pt 6pt;border-left:2.5pt solid var(--ana);font-size:8.6pt;color:#333;background:#f5faf8}
+h2,h3{break-after:avoid}
+table.t,figure{break-inside:avoid}
+.cap{break-before:avoid}
+</style>
+</head>
+<body>
+
+<div class="ust">
+  <div>
+    <div class="ders">İleri Gömülü Sistemler · Vize Projesi · Dr. Murat Sürücü</div>
+    <h1>Kayıt Düğmeli IMU Veri Toplayıcı</h1>
+    <div class="konu">ESP32-S3 + MPU-6050 → UART → Raspberry Pi 4 · Ekleme: BOOT tuşu (GPIO0) ile kayıt başlat/durdur<br>Depo: <span class="m">github.com/berkayderin/vize-2510140024</span></div>
+  </div>
+  <div class="kim"><b>Berkay Derin</b><br>2510140024<br>04.11.2026</div>
+</div>
+
+<div class="ozet"><b>Özet.</b> ESP32-S3, MPU-6050 sensörünü bir donanım zamanlayıcısıyla 50 Hz'de okur ve her ölçümü checksum'lı bir satır olarak UART üzerinden Raspberry Pi'ye gönderir. Ekleme olarak kartın üzerindeki BOOT tuşu kayıt düğmesi yapılmıştır. Her basışta ESP32 <code>$BTN</code> gönderir, Pi kaydı başlatır ya da durdurur. Kayıt sürerken LED yanar, kayıt bitince Pi örnek sayısı, süre, ortalama ivme ve en büyük dönü hızından oluşan bir özet yazar. 60 saniyelik çalıştırmada <b>3001 satırın hiçbiri hatalı değildir</b> (50,00 Hz). 13 kayıttaki 6660 örnek aralığının <b>hepsi 20 ms'dir</b>. LED komutunun ACK süresi 20 tekrarda <b>4,0–4,3 ms</b>'dir. Tuşa yapılan 20 basış <b>tam 20 <code>$BTN</code></b> üretmiştir. Bunlardan birinde tuş 3 kez sıçramış, yazılım bunu tek basış olarak saymıştır.</div>
+
+<h2><span>1</span> Amaç</h2>
+<p>Temel sistemde iş bölümü şöyledir. Zamanlaması kesin olması gereken ölçüm işini ESP32 yapar, doğrulama ve kayıt işini Linux çalışan Pi yapar, iki kart da basit bir metin protokolüyle konuşur. Eklemenin amacı, kaydın ne zaman başlayıp biteceğini kullanıcının fiziksel bir düğmeyle belirlemesidir. Bunun için ayrı bir buton yerine ESP32-S3 kartında zaten bulunan BOOT tuşu (GPIO0) kullanılmıştır. Düğme olayı protokole yeni bir mesaj tipi (<code>$BTN,n</code>) olarak eklenmiştir. Kararı Pi verir: kaydı açar ya da kapatır, durumu <code>$LED</code> komutuyla ESP32'deki LED'e yansıtır ve her kaydı ayrı bir CSV dosyasına yazar. Mekanik bir tuş basılırken birkaç kez açılıp kapanabilir (sıçrama). Projenin ölçüm hedeflerinden biri de bu sıçramanın fazladan <code>$BTN</code> üretmediğini göstermektir.</p>
+
+<h2><span>2</span> Mimari</h2>
+<figure><img src="sekiller/sekil1_mimari.png" alt="Blok şema"></figure>
+<p class="cap"><b>Şekil 1.</b> Blok şema. Parantez içindeki sayılar FreeRTOS görev öncelikleridir.</p>
+<p><b>ESP32</b> tarafında dört görev vardır. <code>esp_timer</code> her 20 ms'de bir çağrı yapar, bu çağrı da <code>sensor_gorevi</code>'ni bir görev bildirimiyle uyandırır. Uyanan görev sensörün 0x3B adresinden başlayan 14 baytını okuyup <code>$IMU</code> satırını hazırlar. Periyot zamanlayıcıdan geldiği için okuma ve biçimlendirme süresi periyoda eklenmez. <code>$HIZ</code> komutu zamanlayıcıyı durdurup yeni periyotla yeniden başlatır. BOOT tuşunun düşen kenarı bir kesme üretir. Kesme yalnızca bir semafor verir, işi <code>dugme_gorevi</code> yapar: 30 ms bekler, tuş hâlâ basılıysa sayacı artırıp <code>$BTN</code> gönderir. Ardından tuş bırakılana kadar bekler, bırakırken oluşan kenarları da yok sayar. <code>komut_gorevi</code> gelen baytları satır satır toplar. Her <code>$</code> yeni bir satır başlatır, böylece yarım kalan veri bir sonraki komutu bozmaz. Satır checksum ile doğrulanır, sonra LED ya da HIZ komutu uygulanır. UART'a yazan tek görev <code>gonderici_gorevi</code>'dir. Diğer görevler satırlarını bir kuyruğa koyar, böylece aynı anda gelen bir ACK ile bir IMU satırı birbirine karışmaz. <b>Pi</b> tarafında <code>protokol.py</code> satırı kodlar ve çözer. <code>alici.py</code> satırları doğrular, <code>$BTN</code> gelince kaydı açar ya da kapatır, kayıt özetini hesaplar ve ACK sürelerini ölçer. <code>sim_esp32.py</code> donanım olmadan deneme için sanal bir seri port açar. Bu pencerede Enter'a basmak BOOT tuşuna basmak yerine geçer.</p>
+
+<h2><span>3</span> Bağlantı</h2>
+<table class="t">
+<tr><th>ESP32-S3</th><th>Bağlandığı yer</th><th>Not</th></tr>
+<tr><td>GPIO17 (UART1 TX)</td><td>Pi pin 10 (RXD)</td><td>çapraz: gönderen → alan</td></tr>
+<tr><td>GPIO18 (UART1 RX)</td><td>Pi pin 8 (TXD)</td><td>çapraz</td></tr>
+<tr><td>G</td><td>Pi pin 6 (GND), breadboard "–" rayı</td><td>ortak toprak (bkz. Bölüm 6)</td></tr>
+<tr><td>3V3 / G (karşı sıra)</td><td>MPU-6050 VCC / GND</td><td>sensör 3,3 V'tan beslenir</td></tr>
+<tr><td>GPIO8 / GPIO9</td><td>MPU-6050 SDA / SCL</td><td>I²C 400 kHz</td></tr>
+<tr><td>GPIO4</td><td>330 Ω → LED → GND</td><td>kayıt göstergesi (<code>$LED</code>)</td></tr>
+<tr><td>GPIO0</td><td>kart üzerindeki BOOT tuşu</td><td>kablo yok; basınca 0 okunur</td></tr>
+</table>
+<p class="cap"><b>Tablo 1.</b> Bağlantılar. Kartlar ayrı USB kablolarından beslenir, Pi'nin 5 V pinleri (2 ve 4) boştur. Pi'de seri konsol kapatılmış ve <code>dtoverlay=disable-bt</code> ile asıl UART seçilmiştir (<code>/dev/serial0 → ttyAMA0</code>).</p>
+<p>GPIO0 bir "strapping" pinidir: kart açılırken basılı tutulursa ESP32 program yerine yükleme kipine girer. Program çalışırken ise sıradan bir giriştir, bu yüzden tuşa çalışma sırasında basılır, açılışta basılmaz.</p>
+
+<h2><span>4</span> Protokol</h2>
+<p>Her satır <code>$GÖVDE*HH\r\n</code> biçimindedir. <code>HH</code>, <code>$</code> ile <code>*</code> arasındaki karakterlerin XOR'unun onaltılık hâlidir. Bağlantı 115200 bit/s, 8N1'dir.</p>
+<table class="t">
+<tr><th>Yön</th><th>Satır</th><th>Örnek</th></tr>
+<tr><td>ESP32 → Pi</td><td><code>IMU,t_ms,ax,ay,az,gx,gy,gz</code> (g, °/s)</td><td><code>$IMU,37974,0.133,-0.055,1.025,-1.68,-0.36,-0.18*77</code></td></tr>
+<tr><td>ESP32 → Pi</td><td><code>BTN,n</code>: n. basış (ekleme)</td><td><code>$BTN,1*45</code></td></tr>
+<tr><td>ESP32 → Pi</td><td><code>ACK,komut,değer</code></td><td><code>$ACK,LED,1*35</code>, <code>$ACK,HIZ,50*17</code></td></tr>
+<tr><td>ESP32 → Pi</td><td><code>ERR,BICIM|CHECKSUM|KOMUT|I2C</code></td><td><code>$ERR,CHECKSUM*64</code></td></tr>
+<tr><td>Pi → ESP32</td><td><code>LED,0|1</code> · <code>HIZ,1..100</code></td><td><code>$LED,1*50</code>, <code>$HIZ,50*72</code></td></tr>
+</table>
+<p class="cap"><b>Tablo 2.</b> Mesajlar. <code>BTN</code> sayacı her basışta bir artar. Pi sayacın atlayıp atlamadığını denetler, böylece kaybolan bir <code>$BTN</code> fark edilir.</p>
+
+<h2><span>5</span> Ölçüm</h2>
+<figure><img src="sekiller/sekil2_olcumler.png" alt="Ölçüm sonuçları"></figure>
+<p class="cap"><b>Şekil 2.</b> (a) BOOT ile açılıp kapanan bir kayıtta breadboard elle eğilirken ivme ve dönü hızının büyüklüğü. (b) LED komutu ile ACK arasındaki süre, logaritmik eksen. (c) 20 basışta ESP32'nin saydığı ham kenarlar ve gönderilen <code>$BTN</code> sayısı.</p>
+
+<h3>5.1 Örnekleme hızı ve örnek kaybı</h3>
+<p>Sensöre dokunulmadan yapılan 60 saniyelik çalıştırmada (<code>olcum/btn_20.txt</code>) Pi <b>3001 geçerli satır</b> aldı: <b>50,00 Hz</b>, <b>0 hatalı satır</b>. 65 saniyelik ikinci çalıştırmada (<code>hiz_60s.txt</code>) 3251 satır geldi (49,92 Hz). Tek hatalı satır, program açıldığı anda ESP32'nin yarısını göndermiş olduğu ilk satırdır (BICIM). Pi'nin kaydettiği 13 dosyada ESP32 zaman damgaları ardışık örnekler arasında <b>6660 aralığın hepsinde tam 20 ms</b> göstermektedir. Yani kayıtlar boyunca ne ESP32 bir periyodu kaçırmış ne de Pi bir satırı kaybetmiştir. ESP32 tarafındaki sayaçlar da aynı sonucu verir: 10 saniyede 500 satır gönderilmiş, kuyruktan atılan satır 0, en uzun UART yazması 199 µs. Düz duran sensörde ortalama |a| 1,03 g, |ω| yaklaşık 2 °/s'dir. Bu fark, kalibrasyon yapılmadığı için ivme ölçeğindeki küçük hatayı ve jiroskobun sıfır kaymasını gösterir.</p>
+
+<h3>5.2 Komut–ACK süresi</h3>
+<p><code>alici.py --ack-testi 20</code> her 0,3 s'de bir <code>$LED</code> komutu gönderip ACK'nin gelişine kadar geçen süreyi ölçer. <b>20 komutun 20'si yanıtlandı</b>: en kısa <b>4,0 ms</b>, ortalama <b>4,2 ms</b>, en uzun <b>4,3 ms</b> (<code>ack_20.txt</code>). Tuş testi sırasında kayıt açılıp kapanırken gönderilen 20 LED komutunda süre 4,4–5,8 ms'dir (ortalama 4,9 ms). Bu sürenin yaklaşık 2,3 ms'si hattaki iletimdir: 11 baytlık komut ile 15 baytlık ACK, 115200 bit/s'de bayt başına 87 µs sürer. Kalanı, ACK'nin o anda gönderilmekte olan bir IMU satırının arkasında beklemesinden ve Pi'deki okuma döngüsünden gelir. Kodun ilk sürümünde bu süre <b>23,7 ms</b> ölçülmüştü (Bölüm 6).</p>
+
+<h3>5.3 Tuş sıçraması</h3>
+<p>Pi'de <code>alici.py</code> çalışırken BOOT tuşuna 60 saniye içinde 20 kez basıldı. Pi <b>20 <code>$BTN</code></b> aldı (sayaç 2 → 21, atlama yok). Kayıt 10 kez açılıp kapandı, LED her seferinde doğru yanıp söndü. Aynı basışlarda ESP32'nin konsoluna yazdığı ham kenar sayıları (<code>btn_esp32_monitor.txt</code>) <b>19 basışta 1</b>, <b>1 basışta 3</b> kenar göstermektedir. Yani tuş bir kez gerçekten sıçramış, ama 30 ms'lik bekleme ve bırakma beklemesi sayesinde tek basış olarak sayılmıştır. Ek 5 basışla birlikte toplam 25 basışın hiçbirinde fazladan <code>$BTN</code> gönderilmemiştir.</p>
+
+<h3>5.4 Hata yakalama ve hız komutu</h3>
+<p>Pi çalışırken ikinci bir oturumdan seri porta bozuk checksum'lı <code>$LED,1*00</code> yazıldı, ESP32 <code>$ERR,CHECKSUM</code> ile yanıt verdi. <code>led 7</code> komutuna <code>$ERR,BICIM</code> döndü. <code>hiz 100</code> ve <code>hiz 50</code> komutları 4,4 ms'de onaylandı. Ölçüm hızı, iki komutun arasına düşen 5 saniyelik pencerede 92,1 Hz'e çıkıp yeniden 50 Hz'e döndü (<code>hiz_ve_hata.txt</code>).</p>
+
+<h2><span>6</span> Karşılaşılan sorunlar</h2>
+<ul>
+<li><b>"Kuyruk dolu" uyarısı ve yankı döngüsü.</b> İlk yüklemede ESP32, 10 saniyede yaklaşık 350 satırı gönderemeden atıyordu. Pi'ye bilinçli olarak hiçbir şey gönderilmediği hâlde eklenen teşhis sayaçları ESP32'ye saniyede 1–2 kB veri geldiğini gösterdi. Üç sebep sırayla bulundu. (1) Yeni kurulan Pi'de seri konsol açıktı. <code>raspi-config</code> ile kapatıldı. (2) ESP32'de TX ve RX kabloları ters takılıydı (GPIO17 Pi'nin TXD'sine gidiyordu). ESP32 kendi gönderdiği satırları geri alıyor, her birini bilinmeyen komut sayıp <code>$ERR,KOMUT</code> ile yanıtlıyordu. Bu yanıtlar da geri geldiği için hat dolana kadar büyüyen bir döngü oluşuyordu (10 saniyede 114 kB). Kablolar düzeltildi. Kodda da önlem alındı: ESP32 artık kendi satır tiplerinden biri (IMU, ACK, ERR, BTN) geri gelirse yanıt vermez, yalnızca bir uyarı sayacını artırır. (3) Pi'nin GND'si (pin 6) bağlı değildi. Pi'ye gelen veri düzenli ama okunamazdı. GND takılınca satırlar temiz geldi. Bu sırada Pi, mini UART'tan (<code>ttyS0</code>) asıl UART'a (<code>ttyAMA0</code>) da geçirildi. Asıl sebebin GND olduğu sonradan anlaşıldığı için bu adımın tek başına gerekli olup olmadığı ayrıca denenmedi.</li>
+<li><b>ACK süresi 23,7 ms çıktı.</b> <code>komut_gorevi</code> UART'ı <code>uart_read_bytes(…, 64, 20 ms)</code> ile okuyordu. Bu çağrı 64 bayt dolana ya da 20 ms geçene kadar dönmediği için 11 baytlık her komut 20 ms bekliyordu. Görev artık ilk bayt gelene kadar bekliyor (<code>portMAX_DELAY</code> ile 1 bayt), sonra tamponda ne varsa hiç beklemeden alıyor. Böylece komut gelir gelmez işleniyor ve süre 4,0–4,3 ms'ye indi.</li>
+<li><b>Türkçe klavye.</b> <code>hız 10</code> (ı ile) yazılınca komut tanınmadı ve ESP32'ye hiçbir şey gönderilmedi. Pi tarafı bunu doğru biçimde "bilinmeyen komut" saydı. Sonraki sürümde <code>alici.py</code> ı harfini i olarak da kabul eder.</li>
+</ul>
+
+<div class="beyan"><b>Yapay zekâ kullanımı beyanı.</b> Bu projedeki ESP32 (<code>main.c</code>) ve Pi (<code>protokol.py</code>, <code>alici.py</code>, <code>sim_esp32.py</code>) kodlarının yazımında, şekil çizim betiğinde ve bu raporun taslağının hazırlanmasında yapay zekâ asistanından (Claude) yararlanılmıştır. Devreyi ben kurdum. Kodları kendi bilgisayarımda derleyip karta yükledim ve Pi'de çalıştırdım. Bütün ölçümleri ve hata ayıklama denemelerini donanım üzerinde kendim yaptım.</div>
+
+</body>
+</html>
